@@ -1,23 +1,72 @@
+// import axios from "axios";
+
+// const api = axios.create({
+//   baseURL: "http://127.0.0.1:8000",
+// });
+
+// export default api;
+
+// export const downloadReport = async () => {
+//     const response = await fetch("http://127.0.0.1:8000/report");
+
+//     const blob = await response.blob();
+
+//     const url = window.URL.createObjectURL(blob);
+
+//     const a = document.createElement("a");
+
+//     a.href = url;
+
+//     a.download = "Business_Report.pdf";
+
+//     a.click();
+// };
+
+
 import axios from "axios";
 
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: API_URL,
 });
 
 export default api;
 
 export const downloadReport = async () => {
-    const response = await fetch("http://127.0.0.1:8000/report");
+  const token = localStorage.getItem("dashboard_access_token");
 
-    const blob = await response.blob();
+  const response = await fetch(`${API_URL}/report/report`, {
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : {},
+  });
 
-    const url = window.URL.createObjectURL(blob);
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      localStorage.removeItem("dashboard_access_token");
+      localStorage.removeItem("dashboard_authenticated");
+    }
 
-    const a = document.createElement("a");
+    throw new Error("Unable to download report.");
+  }
 
-    a.href = url;
+  const blob = await response.blob();
 
-    a.download = "Business_Report.pdf";
+  const url = window.URL.createObjectURL(blob);
 
-    a.click();
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "Business_Report.pdf";
+
+  document.body.appendChild(a);
+  a.click();
+
+  a.remove();
+
+  window.URL.revokeObjectURL(url);
 };
