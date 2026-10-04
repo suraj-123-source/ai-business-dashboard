@@ -3,19 +3,14 @@ import React, { useState } from "react";
 import axios from "axios";
 
 interface RegisterProps {
-  onRegister?: (
-    name: string,
-    email: string,
-    password: string
-  ) => void;
-
   onLogin?: () => void;
 }
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:8000";
 
 export default function Register({
-  onRegister,
   onLogin,
 }: RegisterProps) {
   const [name, setName] = useState("");
